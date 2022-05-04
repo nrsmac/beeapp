@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>BeeApp</title>
+
+{% endblock %}
+
+{% block body %}
+<div class="content">
+	<h1 class=""><span class="s1">BeeApp</span></h1>
+	<p>This will be the viewer!</p>
+	<img class="viewer" src="{{ url_for('video_feed') }}">
+</div>
+{% endblock %}
