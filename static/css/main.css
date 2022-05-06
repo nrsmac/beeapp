@@ -1,4 +1,8 @@
 body {
 	margin:0;
+	border:2px #eee solid;
+	text-align:center;
+	color: brown;
+	padding: 10px;
 	font-family: sans-serif;
 }
