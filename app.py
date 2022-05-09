@@ -1,10 +1,16 @@
 import cv2
 from flask import Flask, render_template, Response, request
-from flask_googlemaps import GoogleMaps, Map
+import requests
+from time import sleep
+# from flask_googlemaps import GoogleMaps, Map
 
 import random
+# import requests
 
-zoom = 1
+#  = [None] * 7
+# x1,y1,x2,y2,angle,lat,long = [None] * 7
+
+# zoom = 1
 
 def create_app():
     """Initialize the application"""
@@ -30,7 +36,7 @@ def create_app():
             else:
                 pass # unknown
         
-        return Response(gen_frames(),
+        return Response(gen(),
                         mimetype='multipart/x-mixed-replace; boundary=frame')
         
     return app
@@ -39,12 +45,12 @@ def create_app():
 app = create_app()
 
 # you can set key as config
-app.config['GOOGLEMAPS_KEY'] = "AIzaSyBeLoqOhI7Px_J2WUhkXlJ4cdxkl_hWk7Q"
+# app.config['GOOGLEMAPS_KEY'] = "AIzaSyBeLoqOhI7Px_J2WUhkXlJ4cdxkl_hWk7Q"
 
 # Initialize the extension
-GoogleMaps(app)
+# GoogleMaps(app)
 
-camera = cv2.VideoCapture(0)
+# camera = cv2.VideoCapture(0)
 
 def gen_frames():  
     while True:
@@ -52,9 +58,11 @@ def gen_frames():
         if not success:
             break
         else:
-            frame = zoom(frame, 2)
+            # frame = zoom(frame, 2)
             #frame = box_faces(frame)
-            
+            # response = requests.get("http://localhost:8080/bee/getBeeInfo")
+            # beeInfoParser(response)
+
             ret, buffer = cv2.imencode('.jpg', frame)
             frame = buffer.tobytes()
             yield (b'--frame\r\n'
@@ -90,15 +98,34 @@ def rectangle_bounce(current_x, current_y):
     return current_x, current_y
     
 
-
 def gen():
     """Video streaming generator function."""
-    img = cv2.imread("bee.jpg")
-    img = cv2.resize(img, (0,0), fx=1, fy=1) 
-    frame = cv2.imencode('.jpg', img)[1].tobytes()
+    frame = cv2.imread("bee.jpg")
+    frame = cv2.resize(frame, (0,0), fx=1, fy=1) 
+
+    response = requests.get("http://localhost:8080/bee/beeInfo")
+    x1,y1,x2,y2,angle,lat,long = beeInfoParser(response)
+    # sleep(1)
+    frame = cv2.rectangle(frame, (x1,y1), (x2, y2), (0,255,0), 2)
+    # frame = cv2.rectangle(frame, (20,20), (50, 50), (0,255,0), 2)
+    frame = cv2.imencode('.jpg', frame)[1].tobytes()
+    
     yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
-
+def beeInfoParser(response): # TODO fix to split
+    args = []
+    current = ""
+    for c in response.text:
+        if c == ",":
+            args.append(current)
+            current = ""
+        else:
+            current+=c
+    args.append(current)
+    x1,y1,x2,y2,= [int(i) for i in args[0:4]]
+    angle,lat,long = [float(i) for i in args[4:]]
+    return (x1,y1,x2,y2,angle,lat,long)
+    print(f"{x1=}, {y1=},{x2=},{y2=}, {angle=}, {lat=}, {long=}")
 
 if __name__ == "__main__":
     app.run(debug=True)
