@@ -5,12 +5,6 @@ from time import sleep
 # from flask_googlemaps import GoogleMaps, Map
 
 import random
-# import requests
-
-#  = [None] * 7
-# x1,y1,x2,y2,angle,lat,long = [None] * 7
-
-# zoom = 1
 
 def create_app():
     """Initialize the application"""
@@ -36,7 +30,7 @@ def create_app():
             else:
                 pass # unknown
         
-        return Response(gen(),
+        return Response(gen_frames(),
                         mimetype='multipart/x-mixed-replace; boundary=frame')
         
     return app
@@ -50,7 +44,7 @@ app = create_app()
 # Initialize the extension
 # GoogleMaps(app)
 
-# camera = cv2.VideoCapture(0)
+camera = cv2.VideoCapture(0)
 
 def gen_frames():  
     while True:
@@ -60,9 +54,10 @@ def gen_frames():
         else:
             # frame = zoom(frame, 2)
             #frame = box_faces(frame)
-            # response = requests.get("http://localhost:8080/bee/getBeeInfo")
-            # beeInfoParser(response)
-
+            response = requests.get("http://localhost:8080/bee/beeInfo")
+            x1,y1,x2,y2,angle,lat,long = beeInfoParser(response)
+            frame = cv2.rectangle(frame, (x1,y1), (x2, y2), (0,255,0), 2)
+            sleep(1) 
             ret, buffer = cv2.imencode('.jpg', frame)
             frame = buffer.tobytes()
             yield (b'--frame\r\n'
@@ -124,8 +119,8 @@ def beeInfoParser(response): # TODO fix to split
     args.append(current)
     x1,y1,x2,y2,= [int(i) for i in args[0:4]]
     angle,lat,long = [float(i) for i in args[4:]]
-    return (x1,y1,x2,y2,angle,lat,long)
     print(f"{x1=}, {y1=},{x2=},{y2=}, {angle=}, {lat=}, {long=}")
+    return (x1,y1,x2,y2,angle,lat,long)
 
 if __name__ == "__main__":
     app.run(debug=True)
