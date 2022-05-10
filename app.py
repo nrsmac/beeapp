@@ -55,9 +55,8 @@ def gen_frames():
             # frame = zoom(frame, 2)
             #frame = box_faces(frame)
             response = requests.get("http://localhost:8080/bee/beeInfo")
-            x1,y1,x2,y2,angle,lat,long = beeInfoParser(response)
-            frame = cv2.rectangle(frame, (x1,y1), (x2, y2), (0,255,0), 2)
-            sleep(1) 
+            x,y,angle,lat,long = beeInfoParser(response)
+            frame = cv2.rectangle(frame, (x-20,y-20), (x+20, y+20), (0,255,0), 2)
             ret, buffer = cv2.imencode('.jpg', frame)
             frame = buffer.tobytes()
             yield (b'--frame\r\n'
@@ -117,10 +116,10 @@ def beeInfoParser(response): # TODO fix to split
         else:
             current+=c
     args.append(current)
-    x1,y1,x2,y2,= [int(i) for i in args[0:4]]
-    angle,lat,long = [float(i) for i in args[4:]]
-    print(f"{x1=}, {y1=},{x2=},{y2=}, {angle=}, {lat=}, {long=}")
-    return (x1,y1,x2,y2,angle,lat,long)
+    x,y= [int(i) for i in args[0:2]]
+    angle,lat,long = [float(i) for i in args[2:]]
+    print(f"{x=}, {y=}, {angle=}, {lat=}, {long=}")
+    return (x, y,angle,lat,long)
 
 if __name__ == "__main__":
     app.run(debug=True)
