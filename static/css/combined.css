@@ -4,7 +4,13 @@
   }
 
 #video {
-	background: lightblue
+	background: lightblue;
+	flex:1;
+}
+
+#video img {
+	margin: 0 auto;
+	text-align: center;
 }
 
 #map {

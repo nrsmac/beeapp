@@ -44,16 +44,22 @@ app = create_app()
 
 camera = cv2.VideoCapture(0)
 
+def rescale_frame(frame, percent=75):
+    width = int(frame.shape[1] * percent/ 100)
+    height = int(frame.shape[0] * percent/ 100)
+    dim = (width, height)
+    return cv2.resize(frame, dim, interpolation =cv2.INTER_AREA)
 
-def gen_frames():  
+def gen_frames():   # for camera
     while True:
         success, frame = camera.read()  # read the camera frame
         if not success:
             break
         else:
-            frame = zoom(frame, 2)
+            frame = zoom(frame, 1)
+            frame = rescale_frame(frame,50)
             #frame = box_faces(frame)
-            response = requests.get("http://localhost:8080/bee/beeInfo")
+            response = requests.get("http://localhost:8080/beeInfo")
             x,y,angle,lat,long = beeInfoParser(response)
             frame = cv2.rectangle(frame, (x-20,y-20), (x+20, y+20), (0,255,0), 2)
             ret, buffer = cv2.imencode('.jpg', frame)
@@ -78,8 +84,13 @@ def box_faces(frame):
         cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 0, 0), 2)
     return frame
     
+def rescale_frame(frame, percent=75):
+    width = int(frame.shape[1] * percent/ 100)
+    height = int(frame.shape[0] * percent/ 100)
+    dim = (width, height)
+    return cv2.resize(frame, dim, interpolation =cv2.INTER_AREA)
 
-def gen():
+def gen():  ## For images
     """Video streaming generator function."""
     frame = cv2.imread("bee.jpg")
     frame = cv2.resize(frame, (0,0), fx=1, fy=1) 
