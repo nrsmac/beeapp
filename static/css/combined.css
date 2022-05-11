@@ -1,0 +1,18 @@
+.box {
+	display: flex;
+	justify-content: space-between;
+  }
+
+#video {
+	background: lightblue
+}
+
+#map {
+	flex: 1;
+	/* Grow to rest of container */
+
+	height: 640;
+
+	background: lightgreen;
+	/* Just so it's visible */
+}
