@@ -56,41 +56,31 @@ def gen_frames_advanced():
     #used for saving points as we go
     run_points = []
     returning = False
-    response = []
-    response.append(150)
-    response.append(150)
-    response.append(1)
-    frame = None
+    frame, x, y, isRun, angle, magnitude, latitude, longitude = None, None, None, None, None, None, None, None
 
     while True:
-        #Fake Data
-        response = simulateResponse(response)
-        x ,y ,angle ,magnitude, lat, long, on_run = simulateParsing(response)
-        response[0] = x
-        response[1] = y
-
-        if frame == None: #in place to prevent permanently waiting for the server on second request
-            new_frame, mat_bytes, new_msg, full_msg = requestFromServer(s)
-
-        if new_msg:
+        #if frame == None: #in place to prevent permanently waiting for the server on second request
+        new_frame, mat_bytes = requestFromServer(s)
+        if new_frame != None:
+            print("Empty Frame")
             frame = new_frame
 
-        #initialize new runpoints array if not already one?
-        #for run in mat_bytes:
-        run = mat_bytes[0]
-        x = int(run[0])
-        y = int(run[1])
-        isRun = run[2]
-        angle = run[3]
-        magnitude = run[4]
-        latitude = run[5]
-        longitude = run[6]
+            #initialize new runpoints array if not already one?
+            #for run in mat_bytes:
+            run = mat_bytes[0]
+            x = int(run[0])
+            y = int(run[1])
+            isRun = run[2]
+            angle = run[3]
+            magnitude = run[4]
+            latitude = run[5]
+            longitude = run[6]
 
         #rescale_frame(frame, SCALE)
         #x = int(x * (SCALE/100))
         #y = int(y * (SCALE/100))
         
-        if on_run:
+        if isRun:
             if returning:
                 returning = False
                 run_points = []
@@ -136,26 +126,10 @@ def rescale_frame(frame, percent=75):
     return cv2.resize(frame, dim, interpolation =cv2.INTER_AREA)
 
 
-#response of format [x, y, direction, timer]
-def simulateParsing(response):
-    #simulates and returns info from the backend
-    if True:
-        #fake data based on fake response
-        #x, y, isRun, angle, magnitude, lat, long
-        x, y, angle, length, lat, longit, on_run = response[0], response[1], None, None, None, None, True
-        x += response[2] * random.randint(10,25)
-        y += random.randint(3,7)
-        return x, y, angle, length, lat, longit, on_run
-
-def simulateResponse(response):
-    response[2] = response[2] * -1
-    return response
-
-
 def requestFromServer(server_socket):
-    full_msg = b''
-    new_msg = True
-    while True:
+        full_msg = b''
+        new_msg = True
+    #while True:
         msg = server_socket.recv(BLOCK_SIZE)
         if new_msg:
             # print(f"{msg.decode()=}")
@@ -175,7 +149,7 @@ def requestFromServer(server_socket):
             #cv2.imwrite("recived.png",img_bytes)
             new_msg = True
             full_msg = b""
-            return img_bytes, mat_bytes, new_msg, full_msg
+            return img_bytes, mat_bytes
 
 
 def beeInfoParser(response): # TODO fix to split
