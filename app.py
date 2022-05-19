@@ -1,10 +1,29 @@
 from math import sin, cos, pi, pow, sqrt
-import csv
 from re import X
 import cv2
 import random
 from flask import Flask, render_template, Response, request
 import requests
+import time
+
+import socket
+import pickle
+from numpy import full, shape
+
+HEADERSIZE = 64
+BLOCK_SIZE = 16348
+RECTANGLE_WIDTH = 150
+SCALE = 75 #percentage
+FRAME_RECEIVED_MSG = "!FRAME_RECEIVED"
+DISCONNECT_MESSAGE = "!DISCONNECT".encode('utf-8')
+
+SERVER_PORT = 5050
+SERVER = socket.gethostbyname(socket.gethostname())
+ADDR = (SERVER, SERVER_PORT)
+
+n_frames = None
+client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+client.connect(ADDR)
 
 
 def create_app():
@@ -37,122 +56,49 @@ def create_app():
     return app
 
 
-app = create_app()
-
-camera = cv2.VideoCapture(0)
-
-
-def gen():  ## For images
-    """Video streaming generator function."""
-    frame = cv2.imread("bee.jpg")
-    frame = cv2.resize(frame, (0,0), fx=1, fy=1) 
-
-    #response = requests.get("http://localhost:8080/bee/beeInfo")
-    x1,y1,x2,y2,angle,lat,long = 100, 100, 150, 150, 30, 100.0, 120.0 #beeInfoParser(response)
-    # sleep(1)
-    frame = cv2.rectangle(frame, (x1,y1), (x2, y2), (0,255,0), 2)
-    # frame = cv2.rectangle(frame, (20,20), (50, 50), (0,255,0), 2)
-    frame = cv2.imencode('.jpg', frame)[1].tobytes()
-    
-    yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-
-
-#Input: jpeg, x, y, angle = None, length = None, lat = None, long = None, on_run = False
-#Functionality: rend jpeg, draw box centered on (x,y), if angle/length != None draw arrow
-#               if lat and long != None draw 
-#Global: save the first recieved point on the run as start point on the arrow, replace as
-#        another run is started. Save points thusfar to show waggle points to help with visualization (draw points on adjacent ones)
+#Need to take test csv data, put into numpy array, format "response" with that and a frame, and process it correctly
 def gen_frames_advanced():
     #used for saving points as we go
     run_points = []
     returning = False
-    response = []
-    response.append(150)
-    response.append(150)
-    response.append(1)
+    frame, x, y, isRun, angle, magnitude, latitude, longitude = None, None, None, None, None, None, None, None
 
     while True:
-        response = simulateResponse(response)
-        frame, x ,y ,angle ,length, lat, long, on_run = simulateParsing(response)
-        response[0] = x
-        response[1] = y
-        if on_run:
+        frame, mat_bytes = requestFrameFromServer()
+
+        # TODO: refactor and clean run code (here until line 96)! 
+        #Initialize run 
+        run = mat_bytes[0]
+        x = int(run[0])
+        y = int(run[1])
+        isRun = run[2]
+        angle = run[3]
+        magnitude = run[4]
+        latitude = run[5]
+        longitude = run[6]
+
+        if isRun:
             if returning:
                 returning = False
                 run_points = []
             run_points.append((x,y))
         else:
             returning = True
+
         for point in run_points:
             cv2.circle(frame, point, 1, (255,100,0), -1)
-        cv2.rectangle(frame, (x-100,y-100), (x+100, y+100), (0,255,0), 2)
-        if angle != None and length != None:
+        cv2.rectangle(frame, (x-RECTANGLE_WIDTH//2,y-RECTANGLE_WIDTH//2), (x+RECTANGLE_WIDTH//2, y+RECTANGLE_WIDTH//2), (0,255,0), 2)
+
+        if angle != None and magnitude != None:
             #TODO - FIX DUMMY VARIABLES
             x_start, y_start = x, y
-            draw_arrow(frame, angle, x_start, y_start, length)
+            draw_arrow(frame, angle, x_start, y_start, magnitude)
+
+        # Encode and write image to webpage
         ret, buffer = cv2.imencode('.jpg', frame)
         frame = buffer.tobytes()
         yield (b'--frame\r\n'
-                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-
-def gen_frames():   # for camera
-    while True:
-        success, frame = camera.read()  # read the camera frame
-        if not success:
-            break
-        else:
-            zoom(frame, 1)
-            frame = rescale_frame(frame,100)
-            #frame = box_faces(frame)
-            #response = requests.get("http://localhost:8080/beeInfo")
-            x,y,angle,lat,long = 100, 100, 100, 100, 100 #beeInfoParser(response)
-            frame = cv2.rectangle(frame, (x-20,y-20), (x+20, y+20), (0,255,0), 2)
-            ret, buffer = cv2.imencode('.jpg', frame)
-            frame = buffer.tobytes()
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')  # concat frame one by one and show result
-
-
-def gen_frames_demo():   # from csv and mp4 files
-    run = 0
-    frame_num = 0
-    scale = 65
-    run_info, box = read_locations()
-    x_min = int(box[0]*scale/100)
-    y_min = int(box[1]*scale/100)
-    x_max = int(box[2]*scale/100)
-    y_max = int(box[3]*scale/100)
-    end_frame, x, y, angle, length = run_info[run]
-    x = int(x*scale/100)
-    y = int(y*scale/100)
-
-    cap = cv2.VideoCapture("C:\\Users\\theca\\OneDrive\\Desktop\\IDeA Labs\\Bee Research\\beeapp\\beeapp\\test_data\\WaggleDance_1.mp4")
-
-    while True:
-        success, frame = cap.read()  # read the camera frame
-        cv2.waitKey(20)
-        if not success:
-            break
-        else:
-            zoom(frame, 1)
-            frame = rescale_frame(frame,scale)
-
-            if end_frame == frame_num:
-                run += 1
-                if run < len(run_info):
-                    end_frame, x, y, angle, length = run_info[run]
-                    x = int(x*scale/100)
-                    y = int(y*scale/100)
-                else:
-                    run, frame_num = 0, 0 #used for looping in testing
-
-            cv2.rectangle(frame, (x_min-40,y_min-40), (x_max+40, y_max+40), (0,255,0), 2)
-            draw_arrow(frame, angle, x, y, length)
-            ret, buffer = cv2.imencode('.jpg', frame)
-            frame = buffer.tobytes()
-            frame_num += 1
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')  # concat frame one by one and show result
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
 
 def zoom(frame, zoom_factor=2):
@@ -169,47 +115,6 @@ def draw_arrow(frame, angle, x_start, y_start, length = 20):
     y_end = y_start + int(sin(angle) * length)
     cv2.arrowedLine(frame, (x_start,y_start), (x_end,y_end),(255,0,0), 2)
 
-
-#The current version only works on my (Caelen's) Computer due to file path issues
-def read_locations(location_file_name = "C:\\Users\\theca\\OneDrive\\Desktop\\IDeA Labs\\Bee Research\\beeapp\\beeapp\\test_data\\WaggleDance_1_Locations.csv", 
-                    run_data_file_name = "C:\\Users\\theca\\OneDrive\\Desktop\\IDeA Labs\\Bee Research\\beeapp\\beeapp\\test_data\WaggleDance_1_Runs.csv"):
-    #Call this method once, extract relevant information from the csv file
-    locations = []
-    max_x, max_y, min_x, min_y = 0, 0, 10000, 10000
-    with open(location_file_name, 'r') as file:
-        csvreader = csv.reader(file)
-        header = next(csvreader)
-        for row in csvreader:
-            locations.append(row)
-            x = int(float(row[1]))
-            if x > max_x:
-                max_x = x
-            if x < min_x:
-                min_x = x
-            y = int(float(row[2]))
-            if y > max_y:
-                max_y = y
-            if y < min_y:
-                min_y = y
-    runs = []
-    with open(run_data_file_name, 'r') as file:
-        csvreader = csv.reader(file)
-        header = next(csvreader)
-        for row in csvreader:
-            if not row[3] == '':
-                run = [None] * 5
-                run[0] = int(row[2]) #end_frame
-                run[1] = int(float(locations[int(row[1])][1])) #start_x
-                run[2] = int(float(locations[int(row[1])][2])) #start_y
-                run[3] = float(row[3]) #angle
-                #uses distance formula to find length
-                length = sqrt(pow(run[1] - float(locations[int(row[2])][1]),2) + pow(run[2] - float(locations[int(row[2])][2]), 2))
-                run[4] = length
-                runs.append(run)
-
-    #[end_frame, start_x, start_y, angle, length]
-    return runs, (min_x, min_y, max_x, max_y)
-
     
 def rescale_frame(frame, percent=75):
     '''Rescales the frame to a percentage of its original size'''
@@ -219,39 +124,33 @@ def rescale_frame(frame, percent=75):
     return cv2.resize(frame, dim, interpolation =cv2.INTER_AREA)
 
 
-def beeInfoParser(response): # TODO fix to split
-    args = []
-    current = ""
-    for c in response.text:
-        if c == ",":
-            args.append(current)
-            current = ""
-        else:
-            current+=c
-    args.append(current)
-    x,y= [int(i) for i in args[0:2]]
-    angle,lat,long = [float(i) for i in args[2:]]
-    print(f"{x=}, {y=}, {angle=}, {lat=}, {long=}")
-    return (x, y,angle,lat,long)
+def requestFrameFromServer():
+    full_msg = b''
+    new_msg = True
+    while True:
+        msg = client.recv(BLOCK_SIZE)
+        if msg == DISCONNECT_MESSAGE:
+            break
 
 
-#response of format [x, y, direction, timer]
-def simulateParsing(response):
-    #simulates and returns info from the backend
-    success, frame = camera.read()
-    if success:
-        #fake data based on fake response
-        x, y, angle, length, lat, longit, on_run = response[0], response[1], None, None, None, None, True
-        x += response[2] * random.randint(10,25)
-        y += random.randint(3,7)
-        return frame, x, y, angle, length, lat, longit, on_run
+        if new_msg:
+            n_frames, imglen, matlen = [int(i) for i in msg[:HEADERSIZE].decode().split(":")]
+            new_msg = False
 
-def simulateResponse(response):
-    response[2] = response[2] * -1
-    return response
-
+        full_msg += msg
+        print(f"Frame:{n_frames} Received: {len(full_msg)} bytes out of {imglen+matlen+HEADERSIZE}")
+        if len(full_msg) >= imglen+matlen+HEADERSIZE:
+            print("full msg recvd")
+            #print(full_msg[HEADERSIZE:])
+            img_bytes = pickle.loads(full_msg[HEADERSIZE:HEADERSIZE+imglen])
+            mat_bytes = pickle.loads(full_msg[HEADERSIZE+imglen:])
+            #print(mat_bytes)
+            #cv2.imwrite("recived.png",img_bytes)
+            new_msg = True
+            full_msg = b""
+            client.send(FRAME_RECEIVED_MSG.encode('utf-8'))
+            return img_bytes, mat_bytes
 
 
 if __name__ == "__main__":
     app.run(debug=True)
-
