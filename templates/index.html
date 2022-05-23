@@ -6,30 +6,10 @@
 {% endblock %}
 
 {% block body %}
-<header class="header">
-	<nav class="navbar">
-		<a href="#" class="nav-logo"><img src="{{url_for('static', filename='images/BeeYU-Logo-2.svg')}}" alt=""></a>
-		<ul class="nav-menu">
-			<li class="nav-item">
-				<a href="/" class="nav-link">Home</a>
-			</li>
-			<li class="nav-item">
-				<a href="/" class="nav-link">Video Feed</a>
-			</li>
-			<li class="nav-item">
-				<a href="/" class="nav-link">About</a>
-			</li>
-		</ul>
-		<div class="hamburger">
-			<span class="bar"></span>
-			<span class="bar"></span>
-			<span class="bar"></span>
-		</div>
-	</nav>
-</header>
 <div class="center-screen">
 	<form action="/combined">
-		<input type="submit" value="START" class="hero-btn"> 
+		<input type="submit" value="START" class="hero-btn"> <br> 
+		<input type="submit" value="ABOUT" class="hero-btn">
 	</form>
 </div>
 {% endblock %}
