@@ -97,11 +97,7 @@ def gen_frames_advanced():
             returning = True
 
         for point in run_points:
-<<<<<<< HEAD
             cv2.circle(frame, point, 2, (0,0,255), -1)
-=======
-            cv2.circle(frame, point, 2, (255,100,0), -1)
->>>>>>> dd9d27820ce08ee942a92ea41486f30e05302d67
         cv2.rectangle(frame, (x-RECTANGLE_WIDTH//2,y-RECTANGLE_WIDTH//2), (x+RECTANGLE_WIDTH//2, y+RECTANGLE_WIDTH//2), (0,255,0), 2)
 
         if angle != None and magnitude != None:
@@ -117,12 +113,9 @@ def gen_frames_advanced():
 
 
 def zoom(frame, zoom_factor=2):
-<<<<<<< HEAD
     x_size, y_size = (len(frame), len(frame[0]))
     # cropped = frame[int(x_size/2 - x_size/2/zoom_factor):int(x_size/2 + x_size/2/zoom_factor),
                     # int(y_size/2 - y_size/2/zoom_factor):int(y_size/2 + y_size/2/zoom_factor)]
-=======
->>>>>>> dd9d27820ce08ee942a92ea41486f30e05302d67
     return cv2.resize(frame, None, fx=zoom_factor, fy=zoom_factor)
 
 
