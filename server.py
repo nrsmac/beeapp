@@ -39,7 +39,7 @@ def load_location_data(path):
             next_frame_data[0][1] = int(float(row[2])) #y data
             next_frame_data[0][2] = int(float(row[3])) #isRun data, stored as 1 or 0
             next_frame_data[0][3] = 30 #placeholder angle
-            next_frame_data[0][4] = 20 #placeholder magnitude
+            next_frame_data[0][4] = 60 #placeholder magnitude
             next_frame_data[0][5] = None #latitude
             next_frame_data[0][6] = None #longitude
             full_data.append(next_frame_data)

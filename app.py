@@ -14,7 +14,7 @@ from numpy import full, shape
 HEADERSIZE = 64
 BLOCK_SIZE = 16348
 RECTANGLE_WIDTH = 150
-SCALE = 75 #percentage
+SCALE = 60 #percentage
 FRAME_RECEIVED_MSG = "!FRAME_RECEIVED"
 DISCONNECT_MESSAGE = "!DISCONNECT".encode('utf-8')
 
@@ -63,8 +63,12 @@ def gen_frames_advanced():
     run_points = []
     returning = False
     frame, x, y, isRun, angle, magnitude, latitude, longitude = None, None, None, None, None, None, None, None
+    start_time = time.time() # start time of the loop
+    #time.sleep(0.05)
 
     while True:
+        #print("FPS: ", 1.0 / (time.time() - start_time))
+        #start_time = time.time() # start time of the loop
         frame, mat_bytes = requestFrameFromServer()
         # frame = zoom(frame, 0.5)
 
@@ -79,6 +83,11 @@ def gen_frames_advanced():
         latitude = run[5]
         longitude = run[6]
 
+        frame = zoom(frame, SCALE/100)
+        x = int(x * SCALE/100)
+        y = int(y * SCALE/100)
+        magnitude = magnitude * SCALE / 100
+
         if isRun:
             if returning:
                 returning = False
@@ -88,7 +97,11 @@ def gen_frames_advanced():
             returning = True
 
         for point in run_points:
+<<<<<<< HEAD
             cv2.circle(frame, point, 2, (0,0,255), -1)
+=======
+            cv2.circle(frame, point, 2, (255,100,0), -1)
+>>>>>>> dd9d27820ce08ee942a92ea41486f30e05302d67
         cv2.rectangle(frame, (x-RECTANGLE_WIDTH//2,y-RECTANGLE_WIDTH//2), (x+RECTANGLE_WIDTH//2, y+RECTANGLE_WIDTH//2), (0,255,0), 2)
 
         if angle != None and magnitude != None:
@@ -104,9 +117,12 @@ def gen_frames_advanced():
 
 
 def zoom(frame, zoom_factor=2):
+<<<<<<< HEAD
     x_size, y_size = (len(frame), len(frame[0]))
     # cropped = frame[int(x_size/2 - x_size/2/zoom_factor):int(x_size/2 + x_size/2/zoom_factor),
                     # int(y_size/2 - y_size/2/zoom_factor):int(y_size/2 + y_size/2/zoom_factor)]
+=======
+>>>>>>> dd9d27820ce08ee942a92ea41486f30e05302d67
     return cv2.resize(frame, None, fx=zoom_factor, fy=zoom_factor)
 
 
@@ -140,7 +156,7 @@ def requestFrameFromServer():
             new_msg = False
 
         full_msg += msg
-        print(f"Frame:{n_frames} Received: {len(full_msg)} bytes out of {imglen+matlen+HEADERSIZE}")
+        #print(f"Frame:{n_frames} Received: {len(full_msg)} bytes out of {imglen+matlen+HEADERSIZE}")
         if len(full_msg) >= imglen+matlen+HEADERSIZE:
             print("full msg recvd")
             #print(full_msg[HEADERSIZE:])
