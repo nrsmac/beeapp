@@ -3,6 +3,7 @@ from re import X
 import cv2
 import random
 from flask import Flask, render_template, Response, request
+from regex import W
 import requests
 import time
 
@@ -65,6 +66,7 @@ def gen_frames_advanced():
 
     while True:
         frame, mat_bytes = requestFrameFromServer()
+        # frame = zoom(frame, 0.5)
 
         # TODO: refactor and clean run code (here until line 96)! 
         #Initialize run 
@@ -86,7 +88,7 @@ def gen_frames_advanced():
             returning = True
 
         for point in run_points:
-            cv2.circle(frame, point, 1, (255,100,0), -1)
+            cv2.circle(frame, point, 2, (0,0,255), -1)
         cv2.rectangle(frame, (x-RECTANGLE_WIDTH//2,y-RECTANGLE_WIDTH//2), (x+RECTANGLE_WIDTH//2, y+RECTANGLE_WIDTH//2), (0,255,0), 2)
 
         if angle != None and magnitude != None:
@@ -103,9 +105,9 @@ def gen_frames_advanced():
 
 def zoom(frame, zoom_factor=2):
     x_size, y_size = (len(frame), len(frame[0]))
-    cropped = frame[int(x_size/2 - x_size/2/zoom_factor):int(x_size/2 + x_size/2/zoom_factor),
-                    int(y_size/2 - y_size/2/zoom_factor):int(y_size/2 + y_size/2/zoom_factor)]
-    return cv2.resize(cropped, None, fx=zoom_factor, fy=zoom_factor)
+    # cropped = frame[int(x_size/2 - x_size/2/zoom_factor):int(x_size/2 + x_size/2/zoom_factor),
+                    # int(y_size/2 - y_size/2/zoom_factor):int(y_size/2 + y_size/2/zoom_factor)]
+    return cv2.resize(frame, None, fx=zoom_factor, fy=zoom_factor)
 
 
 def draw_arrow(frame, angle, x_start, y_start, length = 20):
