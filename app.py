@@ -1,10 +1,8 @@
 from math import sin, cos, pi, pow, sqrt
 from re import X
 import cv2
-import random
 from flask import Flask, render_template, Response, request
 from regex import W
-import requests
 import time
 
 import socket
@@ -23,8 +21,6 @@ SERVER = socket.gethostbyname(socket.gethostname())
 ADDR = (SERVER, SERVER_PORT)
 
 n_frames = None
-client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client.connect(ADDR)
 
 
 def create_app():
@@ -41,7 +37,7 @@ def create_app():
     def video_feed():
         """Video streaming route. Put this in the src attribute of an img tag."""
         
-        return Response(gen_frames_advanced(),
+        return Response(gen_frames(),
                         mimetype='multipart/x-mixed-replace; boundary=frame')
 
     @app.route('/map', methods=['POST', 'GET'])
@@ -58,19 +54,23 @@ def create_app():
 
 
 #Need to take test csv data, put into numpy array, format "response" with that and a frame, and process it correctly
-def gen_frames_advanced():
+def gen_frames():
     #used for saving points as we go
     run_points = []
     returning = False
     frame, x, y, isRun, angle, magnitude, latitude, longitude = None, None, None, None, None, None, None, None
     start_time = time.time() # start time of the loop
+    client = connect_to_server()
     #time.sleep(0.05)
 
     while True:
         #print("FPS: ", 1.0 / (time.time() - start_time))
         #start_time = time.time() # start time of the loop
-        frame, mat_bytes = requestFrameFromServer()
+        request = requestFrameFromServer(client)
+        if request is None:
+            return
         # frame = zoom(frame, 0.5)
+        frame, mat_bytes = request
 
         # TODO: refactor and clean run code (here until line 96)! 
         #Initialize run 
@@ -127,6 +127,12 @@ def draw_arrow(frame, angle, x_start, y_start, length = 20):
     cv2.arrowedLine(frame, (x_start,y_start), (x_end,y_end),(255,0,0), 2)
 
     
+def connect_to_server():
+    client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    client.connect(ADDR)
+    return client
+
+
 def rescale_frame(frame, percent=75):
     '''Rescales the frame to a percentage of its original size'''
     width = int(frame.shape[1] * percent/ 100)
@@ -135,14 +141,15 @@ def rescale_frame(frame, percent=75):
     return cv2.resize(frame, dim, interpolation =cv2.INTER_AREA)
 
 
-def requestFrameFromServer():
+def requestFrameFromServer(client):
     full_msg = b''
     new_msg = True
     while True:
         msg = client.recv(BLOCK_SIZE)
         if msg == DISCONNECT_MESSAGE:
-            break
-
+            client.close()
+            print("SERVER DISCONNECTED")
+            return None
 
         if new_msg:
             n_frames, imglen, matlen = [int(i) for i in msg[:HEADERSIZE].decode().split(":")]
@@ -151,7 +158,7 @@ def requestFrameFromServer():
         full_msg += msg
         #print(f"Frame:{n_frames} Received: {len(full_msg)} bytes out of {imglen+matlen+HEADERSIZE}")
         if len(full_msg) >= imglen+matlen+HEADERSIZE:
-            print("full msg recvd")
+            # print("full msg recvd")
             #print(full_msg[HEADERSIZE:])
             img_bytes = pickle.loads(full_msg[HEADERSIZE:HEADERSIZE+imglen])
             mat_bytes = pickle.loads(full_msg[HEADERSIZE+imglen:])
