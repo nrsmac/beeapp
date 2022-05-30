@@ -19,6 +19,7 @@ DISCONNECT_MESSAGE = "!DISCONNECT"
 FRAME_RECEIVED_MSG = "!FRAME_RECEIVED"
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)  # allows port to be reused
 server.bind(ADDR)
 # [x,y,isRun,angle,lat,long] e
 
@@ -73,7 +74,7 @@ def handle_client(conn, addr):
             msg = createMessage(counter, frame, location_data[counter])
             conn.send(msg) 
             m = conn.recv(64).decode('utf-8')
-            print(m)
+            # print(m)
             if m == FRAME_RECEIVED_MSG:
                 counter += 1
             if m == DISCONNECT_MESSAGE:
@@ -81,6 +82,7 @@ def handle_client(conn, addr):
         else:
             break
     conn.send(DISCONNECT_MESSAGE.encode('utf-8'))
+    print(f"[CONNECTION CLOSED] {addr} disconnected")
     conn.close()
     
 
