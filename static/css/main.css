@@ -1,132 +1,99 @@
+/*    
+
+
+*/
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", Oxygen,
+  font-family: Poppins, -apple-system, BlinkMacSystemFont, "Segoe UI", Oxygen,
     Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
 }
 
-header li {
-  list-style: none;
-}
 
-header a {
-  text-decoration: none;
-}
+/* Second Design */
 
-.header {
-	position: -webkit-sticky;
-	position: sticky;
-	top: 0;
-}
-
-.header {
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.navbar {
+nav {
+  width: 100%;
+  background-color: #001832;
   display: flex;
-  justify-content: space-between;
+  color: #fff;
+  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  padding: 1rem 1.5rem;
+  position: relative;
 }
-
-.hamburger {
+span.nav-toggle {
+  font-size: 30px;
+  display: inline-block;
+  position: absolute;
+  top: 20px;
+  left: 20px;
+}
+.icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: inline-block;
+}
+ul {
   display: none;
+  flex-direction: column;
+  justify-content: center;
+  padding-left: 0;
 }
-
-.bar {
-  display: block;
-  width: 25px;
-  height: 3px;
-  margin: 5px auto;
-  -webkit-transition: all 0.3s ease-in-out;
-  transition: all 0.3s ease-in-out;
-  background-color: #101010;
+ul li {
+  list-style-type: none;
+  font-size: 15px;
+  cursor: pointer;
+  margin: 20px;
+  text-align: center;
+  border-bottom-style: solid;
+  border-bottom-color: #fff;
+  border-bottom-width: 1px;
+  padding: 3px 30px;
 }
-
-.nav-menu {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+ul li:first-child {
+  margin-top: 0;
 }
-
-.nav-item {
-  margin-left: 3rem;
-}
-
-.nav-link {
-  font-size: 1.3rem;
-  font-weight: 400;
-  color: #002255;
-}
-
-.nav-link:hover {
+ul li:hover {
   color: #faaf40;
 }
-
-.nav-logo {
-  font-size: 2.1rem;
-  font-weight: 500;
-  color: red;
+.active {
+  display: flex;
 }
 
-@media only screen and (max-width: 768px) {
-  .nav-menu {
-    position: fixed;
-    left: -100%;
-    top: 5rem;
-    flex-direction: column;
-    background-color: #fff;
+@media screen and (min-width: 802px) {
+  nav {
+    height: 70px;
+    flex-direction: row;
+  }
+  .logo {
+    display: flex;
+    padding-left: 10px;
+    margin: 0;
+    width: 20%;
+  }
+  ul {
+    display: flex;
+    justify-content: flex-end;
     width: 100%;
-    border-radius: 10px;
-    text-align: center;
-    transition: 0.3s;
-    box-shadow: 0 10px 27px rgba(0, 0, 0, 0.05);
+    flex-direction: row;
+  }
+  ul li {
+    display: inline-block;
+    margin: 0 60px 0 0;
+    text-align: left;
+    border-bottom-style: none;
+    padding: 0;
+  }
+  span.nav-toggle {
+    display: none;
   }
 
-  .nav-menu.active {
-    left: 0;
+  ul li:active {
+    color: #faaf40;
   }
 
-  .nav-item {
-    margin: 2.5rem 0;
-  }
-
-  .hamburger {
-    display: block;
-    cursor: pointer;
-  }
-
-  .hamburger.active .bar:nth-child(2) {
-    opacity: 0;
-  }
-
-  .hamburger.active .bar:nth-child(1) {
-    transform: translateY(8px) rotate(45deg);
-  }
-
-  .hamburger.active .bar:nth-child(3) {
-    transform: translateY(-8px) rotate(-45deg);
-  }
-}
-
-.hero-btn {
-  display: inline-block;
-  color: #002255;
-  border: 1px solid #002255;
-  padding: 12px 34px;
-  font-size: 1.5rem;
-  position: relative;
-  cursor: pointer;
-  border-radius: 30px;
-  margin-bottom: 30px;
-}
-
-.center-screen {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	text-align: center;
-	min-height: 100vh;
 }

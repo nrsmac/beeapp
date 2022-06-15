@@ -13,30 +13,20 @@
       href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,200;0,300;1,100;1,200;1,300;1,400&display=swap"
       rel="stylesheet"
     />
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
     {% block head %}{% endblock %}
   </head>
   <body>
-    {% include 'navbar.html'%}
-    {% block body %}{% endblock %}
+    {% include 'navbar.html'%} {% block body %}{% endblock %}
     <script>
-      const hamburger = document.querySelector(".hamburger");
-      const navMenu = document.querySelector(".nav-menu");
-
-      hamburger.addEventListener("click", mobileMenu);
-
-      function mobileMenu() {
-        hamburger.classList.toggle("active");
-        navMenu.classList.toggle("active");
-      }
-
-      const navLink = document.querySelectorAll(".nav-link");
-
-      navLink.forEach(n => n.addEventListener("click", closeMenu));
-
-      function closeMenu() {
-        hamburger.classList.remove("active");
-        navMenu.classList.remove("active");
-      }
+      let mainNav = document.getElementById("js-menu");
+      let navBarToggle = document.getElementById("js-nav-toggle");
+      navBarToggle.addEventListener("click", function () {
+        mainNav.classList.toggle("active");
+      });
     </script>
   </body>
 </html>
