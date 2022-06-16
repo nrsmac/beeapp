@@ -66,50 +66,49 @@ def gen_frames():
     while True:
         #print("FPS: ", 1.0 / (time.time() - start_time))
         #start_time = time.time() # start time of the loop
-        request = requestFrameFromServer(client)
-        if request is None:
-            return
-        # frame = zoom(frame, 0.5)
-        frame, mat_bytes = request
+        frames = receive_frame(client)
+        for frame_with_data in frames: 
+            print(type(frame_with_data)) #FIXME only numpy is coming through
+            frame, mat_bytes = frame_with_data
 
-        # TODO: refactor and clean run code (here until line 96)! 
-        #Initialize run 
-        run = mat_bytes[0]
-        x = int(run[0])
-        y = int(run[1])
-        isRun = run[2]
-        angle = run[3]
-        magnitude = run[4]
-        latitude = run[5]
-        longitude = run[6]
+            # TODO: refactor and clean run code (here until line 96)! 
+            #Initialize run 
+            run = mat_bytes[0]
+            x = int(run[0])
+            y = int(run[1])
+            isRun = run[2]
+            angle = run[3]
+            magnitude = run[4]
+            latitude = run[5]
+            longitude = run[6]
 
-        frame = zoom(frame, SCALE/100)
-        x = int(x * SCALE/100)
-        y = int(y * SCALE/100)
-        magnitude = magnitude * SCALE / 100
+            frame = zoom(frame, SCALE/100)
+            x = int(x * SCALE/100)
+            y = int(y * SCALE/100)
+            magnitude = magnitude * SCALE / 100
 
-        if isRun:
-            if returning:
-                returning = False
-                run_points = []
-            run_points.append((x,y))
-        else:
-            returning = True
+            if isRun:
+                if returning:
+                    returning = False
+                    run_points = []
+                run_points.append((x,y))
+            else:
+                returning = True
 
-        for point in run_points:
-            cv2.circle(frame, point, 2, (0,0,255), -1)
-        cv2.rectangle(frame, (x-RECTANGLE_WIDTH//2,y-RECTANGLE_WIDTH//2), (x+RECTANGLE_WIDTH//2, y+RECTANGLE_WIDTH//2), (0,255,0), 2)
+            for point in run_points:
+                cv2.circle(frame, point, 2, (0,0,255), -1)
+            cv2.rectangle(frame, (x-RECTANGLE_WIDTH//2,y-RECTANGLE_WIDTH//2), (x+RECTANGLE_WIDTH//2, y+RECTANGLE_WIDTH//2), (0,255,0), 2)
 
-        if angle != None and magnitude != None:
-            #TODO - FIX DUMMY VARIABLES
-            x_start, y_start = x, y
-            draw_arrow(frame, angle, x_start, y_start, magnitude)
+            if angle != None and magnitude != None:
+                #TODO - FIX DUMMY VARIABLES
+                x_start, y_start = x, y
+                draw_arrow(frame, angle, x_start, y_start, magnitude)
 
-        # Encode and write image to webpage
-        ret, buffer = cv2.imencode('.jpg', frame)
-        frame = buffer.tobytes()
-        yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+            # Encode and write image to webpage
+            ret, buffer = cv2.imencode('.jpg', frame)
+            frame = buffer.tobytes()
+            yield (b'--frame\r\n'
+                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
 
 def zoom(frame, zoom_factor=2):
@@ -140,8 +139,24 @@ def rescale_frame(frame, percent=75):
     dim = (width, height)
     return cv2.resize(frame, dim, interpolation =cv2.INTER_AREA)
 
+def receive_second(client):
+    '''Receives 30 frames from server. Blocks until 30 frames have been received.'''
+    frames_received = 0 
+    frames_with_data = []
+    
+    while frames_received < 30:
+        response = receive_frame(client)
+        if response is None:
+            return
+        # frame = zoom(frame, 0.5)
+        img_bytes, mat_bytes = response 
+        frames_with_data.append(img_bytes, mat_bytes)
+        frames_received+=1
 
-def requestFrameFromServer(client):
+    return frames_with_data
+        
+def receive_frame(client):
+    '''Receives one frame from server over client socket'''
     full_msg = b''
     new_msg = True
     while True:

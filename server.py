@@ -81,9 +81,9 @@ def handle_client(conn, addr):
                 break
         else:
             break
-    conn.send(DISCONNECT_MESSAGE.encode('utf-8'))
-    print(f"[CONNECTION CLOSED] {addr} disconnected")
-    conn.close()
+#    conn.send(DISCONNECT_MESSAGE.encode('utf-8'))
+#    print(f"[CONNECTION CLOSED] {addr} disconnected")
+#    conn.close()
     
 
 def start():
