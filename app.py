@@ -1,13 +1,14 @@
 from math import sin, cos, pi, pow, sqrt
 from re import X
-import cv2
 from flask import Flask, render_template, Response, request
 from regex import W
-import time
+from numpy import full, shape
 
+import time
+import cv2
 import socket
 import pickle
-from numpy import full, shape
+import threading
 
 HEADERSIZE = 64
 BLOCK_SIZE = 16348
@@ -53,25 +54,24 @@ def create_app():
     return app
 
 
-#Need to take test csv data, put into numpy array, format "response" with that and a frame, and process it correctly
 def gen_frames():
     #used for saving points as we go
     run_points = []
     returning = False
+    seconds = [] # Seconds is a buffer that is populated in a background thread, receive_thread
     frame, x, y, isRun, angle, magnitude, latitude, longitude = None, None, None, None, None, None, None, None
     start_time = time.time() # start time of the loop
     client = connect_to_server()
-    #time.sleep(0.05)
+    receiving_thread = threading.Thread(target=receive_stream, args=(client, seconds))
+    receiving_thread.start()
 
-    while True:
-        #print("FPS: ", 1.0 / (time.time() - start_time))
-        #start_time = time.time() # start time of the loop
-        frames = receive_frame(client)
-        for frame_with_data in frames: 
-            print(type(frame_with_data)) #FIXME only numpy is coming through
-            frame, mat_bytes = frame_with_data
+    time.sleep(1)  # makes it more likely that seconds is already populated
+    while seconds:
+        print(f"{seconds=}")
+        for frame_with_data in seconds.pop(0):
+            print(f"{type(frame_with_data)=}")
+            frame, mat_bytes = frame_with_data 
 
-            # TODO: refactor and clean run code (here until line 96)! 
             #Initialize run 
             run = mat_bytes[0]
             x = int(run[0])
@@ -109,6 +109,7 @@ def gen_frames():
             frame = buffer.tobytes()
             yield (b'--frame\r\n'
                     b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+            time.sleep(0.03) # TODO: fix timing 
 
 
 def zoom(frame, zoom_factor=2):
@@ -139,22 +140,27 @@ def rescale_frame(frame, percent=75):
     dim = (width, height)
     return cv2.resize(frame, dim, interpolation =cv2.INTER_AREA)
 
+def receive_stream(client, seconds):
+    while True:
+        second = receive_second(client)
+        if second == None:
+            return None
+        seconds.append(second)
+
 def receive_second(client):
     '''Receives 30 frames from server. Blocks until 30 frames have been received.'''
-    frames_received = 0 
     frames_with_data = []
     
-    while frames_received < 30:
+    while len(frames_with_data) < 30:
         response = receive_frame(client)
         if response is None:
-            return
+            return None
         # frame = zoom(frame, 0.5)
         img_bytes, mat_bytes = response 
-        frames_with_data.append(img_bytes, mat_bytes)
-        frames_received+=1
-
+        frames_with_data.append((img_bytes, mat_bytes))
+    
     return frames_with_data
-        
+
 def receive_frame(client):
     '''Receives one frame from server over client socket'''
     full_msg = b''
