@@ -67,9 +67,7 @@ def gen_frames():
 
     time.sleep(1)  # makes it more likely that seconds is already populated
     while seconds:
-        print(f"{seconds=}")
         for frame_with_data in seconds.pop(0):
-            print(f"{type(frame_with_data)=}")
             frame, mat_bytes = frame_with_data 
 
             #Initialize run 
@@ -109,7 +107,7 @@ def gen_frames():
             frame = buffer.tobytes()
             yield (b'--frame\r\n'
                     b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-            time.sleep(0.03) # TODO: fix timing 
+            time.sleep(0.033333333333) # TODO: will this cause issues? Will the lag just get worse each time?  
 
 
 def zoom(frame, zoom_factor=2):
