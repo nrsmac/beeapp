@@ -20,7 +20,8 @@
     {% block head %}{% endblock %}
   </head>
   <body>
-    {% include 'navbar.html'%} {% block body %}{% endblock %}
+    {% include 'navbar.html'%} {% block body %}{% endblock %} {% include
+    'footer.html' %}
     <script>
       let mainNav = document.getElementById("js-menu");
       let navBarToggle = document.getElementById("js-nav-toggle");

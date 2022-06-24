@@ -1,3 +1,4 @@
+from crypt import methods
 from math import sin, cos, pi, pow, sqrt
 from re import X
 import cv2
@@ -42,6 +43,18 @@ def create_app():
     def combinedview():
 
         return render_template('combined.html')
+
+    @app.route('/wagglechat', methods=['POST', 'GET'])
+    def wagglechat():
+        return render_template('wagglechat.html')
+
+    @app.route('/livevideo', methods=['POST', 'GET'])
+    def livevideo():
+        return render_template('livevideo.html')
+
+    @app.route('/club', methods=['POST', 'GET'])
+    def club():
+        return render_template('club.html')
         
     return app
 
