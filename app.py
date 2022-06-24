@@ -60,7 +60,7 @@ def gen_frames():
     returning = False
     seconds = [] # Seconds is a buffer that is populated in a background thread, receive_thread
     frame, x, y, isRun, angle, magnitude, latitude, longitude = None, None, None, None, None, None, None, None
-    start_time = time.time() # start time of the loop
+
     client = connect_to_server()
     receiving_thread = threading.Thread(target=receive_stream, args=(client, seconds))
     receiving_thread.start()
