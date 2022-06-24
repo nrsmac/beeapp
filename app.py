@@ -1,14 +1,13 @@
 from math import sin, cos, pi, pow, sqrt
 from re import X
+import cv2
 from flask import Flask, render_template, Response, request
 from regex import W
-from numpy import full, shape
-
 import time
-import cv2
+
 import socket
 import pickle
-import threading
+from numpy import full, shape
 
 HEADERSIZE = 64
 BLOCK_SIZE = 16348
@@ -54,60 +53,63 @@ def create_app():
     return app
 
 
+#Need to take test csv data, put into numpy array, format "response" with that and a frame, and process it correctly
 def gen_frames():
     #used for saving points as we go
     run_points = []
     returning = False
-    seconds = [] # Seconds is a buffer that is populated in a background thread, receive_thread
     frame, x, y, isRun, angle, magnitude, latitude, longitude = None, None, None, None, None, None, None, None
     start_time = time.time() # start time of the loop
     client = connect_to_server()
-    receiving_thread = threading.Thread(target=receive_stream, args=(client, seconds))
-    receiving_thread.start()
+    #time.sleep(0.05)
 
-    time.sleep(1)  # makes it more likely that seconds is already populated
-    while seconds:
-        for frame_with_data in seconds.pop(0):
-            frame, mat_bytes = frame_with_data 
+    while True:
+        #print("FPS: ", 1.0 / (time.time() - start_time))
+        #start_time = time.time() # start time of the loop
+        request = requestFrameFromServer(client)
+        if request is None:
+            return
+        # frame = zoom(frame, 0.5)
+        frame, mat_bytes = request
 
-            #Initialize run 
-            run = mat_bytes[0]
-            x = int(run[0])
-            y = int(run[1])
-            isRun = run[2]
-            angle = run[3]
-            magnitude = run[4]
-            latitude = run[5]
-            longitude = run[6]
+        # TODO: refactor and clean run code (here until line 96)! 
+        #Initialize run 
+        run = mat_bytes[0]
+        x = int(run[0])
+        y = int(run[1])
+        isRun = run[2]
+        angle = run[3]
+        magnitude = run[4]
+        latitude = run[5]
+        longitude = run[6]
 
-            frame = zoom(frame, SCALE/100)
-            x = int(x * SCALE/100)
-            y = int(y * SCALE/100)
-            magnitude = magnitude * SCALE / 100
+        frame = zoom(frame, SCALE/100)
+        x = int(x * SCALE/100)
+        y = int(y * SCALE/100)
+        magnitude = magnitude * SCALE / 100
 
-            if isRun:
-                if returning:
-                    returning = False
-                    run_points = []
-                run_points.append((x,y))
-            else:
-                returning = True
+        if isRun:
+            if returning:
+                returning = False
+                run_points = []
+            run_points.append((x,y))
+        else:
+            returning = True
 
-            for point in run_points:
-                cv2.circle(frame, point, 2, (0,0,255), -1)
-            cv2.rectangle(frame, (x-RECTANGLE_WIDTH//2,y-RECTANGLE_WIDTH//2), (x+RECTANGLE_WIDTH//2, y+RECTANGLE_WIDTH//2), (0,255,0), 2)
+        for point in run_points:
+            cv2.circle(frame, point, 2, (0,0,255), -1)
+        cv2.rectangle(frame, (x-RECTANGLE_WIDTH//2,y-RECTANGLE_WIDTH//2), (x+RECTANGLE_WIDTH//2, y+RECTANGLE_WIDTH//2), (0,255,0), 2)
 
-            if angle != None and magnitude != None:
-                #TODO - FIX DUMMY VARIABLES
-                x_start, y_start = x, y
-                draw_arrow(frame, angle, x_start, y_start, magnitude)
+        if angle != None and magnitude != None:
+            #TODO - FIX DUMMY VARIABLES
+            x_start, y_start = x, y
+            draw_arrow(frame, angle, x_start, y_start, magnitude)
 
-            # Encode and write image to webpage
-            ret, buffer = cv2.imencode('.jpg', frame)
-            frame = buffer.tobytes()
-            yield (b'--frame\r\n'
-                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-            time.sleep(0.033333333333) # TODO: will this cause issues? Will the lag just get worse each time?  
+        # Encode and write image to webpage
+        ret, buffer = cv2.imencode('.jpg', frame)
+        frame = buffer.tobytes()
+        yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
 
 def zoom(frame, zoom_factor=2):
@@ -157,7 +159,7 @@ def receive_second(client):
         frames_with_data.append((img_bytes, mat_bytes))
     
     return frames_with_data
-
+  
 def receive_frame(client):
     '''Receives one frame from server over client socket'''
     full_msg = b''
@@ -186,7 +188,6 @@ def receive_frame(client):
             full_msg = b""
             client.send(FRAME_RECEIVED_MSG.encode('utf-8'))
             return img_bytes, mat_bytes
-
 
 if __name__ == "__main__":
     app.run(debug=True)
