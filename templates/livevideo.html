@@ -1,0 +1,37 @@
+{% extends 'base.html' %} {% block head %}
+<title>Live Video</title>
+{% endblock %} {% block body %}
+
+<section class="main-content">
+  <h1 class="the-feed">Live Video Feed</h1>
+  <section class="about-us">
+    <div class="row">
+      <div class="about-col">
+        <h1 class="the-h1">About</h1>
+        <iframe
+          width="560"
+          height="315"
+          src="https://www.youtube.com/embed/tntLYu_YdMA"
+          title="YouTube video player"
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen
+        ></iframe>
+      </div>
+      <div class="about-col">
+        <h1 class="the-h1">Live Stream</h1>
+        <iframe
+          width="560"
+          height="315"
+          src="https://www.youtube.com/embed/vT2cNLcjYN4"
+          title="YouTube video player"
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen
+        ></iframe>
+      </div>
+    </div>
+  </section>
+</section>
+
+{% endblock %}

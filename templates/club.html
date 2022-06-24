@@ -1,0 +1,133 @@
+{% extends 'base.html' %} {% block head %}
+<title>Club</title>
+{% endblock %} {% block body %}
+
+<section class="main-content">
+  <div class="club-logo">
+    <img
+      src="{{url_for('static', filename='/images/beeyu-club.svg')}}"
+      alt="Club Logo"
+    />
+  </div>
+  <section class="about-us">
+    <div class="row">
+      <div class="about-col">
+        <h1>WHAT IS IT?</h1>
+        <p>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+          eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
+          minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+          aliquip ex ea commodo consequat. Duis aute irure dolor in
+          reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+          pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
+          culpa qui officia deserunt mollit anim id est laborum.
+        </p>
+      </div>
+      <div class="about-col">
+        <div class="the-card card-blue-light">
+          <h3>Get Involved</h3>
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+            eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
+            ad minim veniam, quis nostrud exercitation.
+          </p>
+          <div class="pad-top"><a href="#" class="button">Learn More</a></div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="club-team-section">
+    <h1 class="leadership-h1">LEADERSHIP</h1>
+    <div class="the-container">
+      <div class="the-card">
+        <div class="the-content">
+          <div class="imgBx">
+            <img src="/static/images/BeeYU-Logo-2.svg" />
+          </div>
+          <div class="contentBx">
+            <h3>Kimley Morlant<br /><span>President</span></h3>
+          </div>
+        </div>
+        <ul class="sci">
+          <li style="--i: 1">
+            <a href=""><i class="fa fa-facebook"></i></a>
+          </li>
+          <li>
+            <a href="" style="--i: 2"><i class="fa fa-facebook"></i></a>
+          </li>
+          <li>
+            <a href="" style="--i: 3"><i class="fa fa-facebook"></i></a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="the-card">
+        <div class="the-content">
+          <div class="imgBx">
+            <img src="/static/images/BeeYU-Logo-2.svg" />
+          </div>
+          <div class="contentBx">
+            <h3>Fritz-Carl Morlant<br /><span>Vice President</span></h3>
+          </div>
+        </div>
+        <ul class="sci">
+          <li style="--i: 1">
+            <a href=""><i class="fa fa-facebook"></i></a>
+          </li>
+          <li>
+            <a href="" style="--i: 2"><i class="fa fa-facebook"></i></a>
+          </li>
+          <li>
+            <a href="" style="--i: 3"><i class="fa fa-facebook"></i></a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="the-card">
+        <div class="the-content">
+          <div class="imgBx">
+            <img src="/static/images/BeeYU-Logo-2.svg" />
+          </div>
+          <div class="contentBx">
+            <h3>Caelen Miller<br /><span>Vice President</span></h3>
+          </div>
+        </div>
+        <ul class="sci">
+          <li style="--i: 1">
+            <a href=""><i class="fa fa-facebook"></i></a>
+          </li>
+          <li>
+            <a href="" style="--i: 2"><i class="fa fa-facebook"></i></a>
+          </li>
+          <li>
+            <a href="" style="--i: 3"><i class="fa fa-facebook"></i></a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="the-card">
+        <div class="the-content">
+          <div class="imgBx">
+            <img src="/static/images/BeeYU-Logo-2.svg" />
+          </div>
+          <div class="contentBx">
+            <h3>Alyssa Crezee<br /><span>Vice President</span></h3>
+          </div>
+        </div>
+        <ul class="sci">
+          <li style="--i: 1">
+            <a href=""><i class="fa fa-facebook"></i></a>
+          </li>
+          <li>
+            <a href="" style="--i: 2"><i class="fa fa-facebook"></i></a>
+          </li>
+          <li>
+            <a href="" style="--i: 3"><i class="fa fa-facebook"></i></a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</section>
+
+{% endblock %}

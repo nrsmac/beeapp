@@ -1,15 +1,72 @@
-{% extends 'base.html' %}
-
-{% block head %}
+{% extends 'base.html' %} {% block head %}
 <title>BeeApp</title>
 
-{% endblock %}
-
-{% block body %}
-<div class="center-screen">
-	<form action="/combined">
-		<input type="submit" value="START" class="hero-btn"> <br> 
-		<input type="submit" value="ABOUT" class="hero-btn">
-	</form>
-</div>
+{% endblock %} {% block body %}
+<section class="main-content">
+  <section class="about-us">
+    <div class="row">
+      <div class="about-col">
+        <h1>About</h1>
+        <p>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+          eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
+          minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+          aliquip ex ea commodo consequat. Duis aute irure dolor in
+          reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+          pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
+          culpa qui officia deserunt mollit anim id est laborum.
+        </p>
+        <a href="#" class="hero-btn">EXPLORE</a>
+      </div>
+      <div class="about-col">
+        <h1>Live Stream <i class="fa fa-rss"></i></h1>
+        <iframe
+          width="560"
+          height="315"
+          src="https://www.youtube.com/embed/tntLYu_YdMA"
+          title="YouTube video player"
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen
+        ></iframe>
+      </div>
+    </div>
+  </section>
+  <section class="about-us">
+    <div class="row">
+      <div class="about-col">
+        <h1>About</h1>
+        <section class="container">
+          <div class="card">
+            <div class="card-image img-1"></div>
+            <h2>Title</h2>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+            <a href="#">LEARN MORE</a>
+          </div>
+          <div class="card">
+            <div class="card-image img-2"></div>
+            <h2>Title</h2>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+            <a href="#">LEARN MORE</a>
+          </div>
+        </section>
+      </div>
+      <div class="about-col">
+        <h1>News</h1>
+        <a
+          class="twitter-timeline"
+          data-width="500"
+          data-height="500"
+          href="https://twitter.com/bees_at_byu?ref_src=twsrc%5Etfw"
+          >Tweets by bees_at_byu</a
+        >
+        <script
+          async
+          src="https://platform.twitter.com/widgets.js"
+          charset="utf-8"
+        ></script>
+      </div>
+    </div>
+  </section>
+</section>
 {% endblock %}
