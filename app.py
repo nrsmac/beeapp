@@ -153,7 +153,6 @@ def receive_second(client):
         response = receive_frame(client)
         if response is None:
             return None
-        # frame = zoom(frame, 0.5)
         img_bytes, mat_bytes = response 
         frames_with_data.append((img_bytes, mat_bytes))
     
