@@ -140,8 +140,28 @@ def rescale_frame(frame, percent=75):
     dim = (width, height)
     return cv2.resize(frame, dim, interpolation =cv2.INTER_AREA)
 
+def receive_stream(client, seconds):
+    while True:
+        second = receive_second(client)
+        if second == None:
+            return None
+        seconds.append(second)
 
-def requestFrameFromServer(client):
+def receive_second(client):
+    '''Receives 30 frames from server. Blocks until 30 frames have been received.'''
+    frames_with_data = []
+    
+    while len(frames_with_data) < 30:
+        response = receive_frame(client)
+        if response is None:
+            return None
+        img_bytes, mat_bytes = response 
+        frames_with_data.append((img_bytes, mat_bytes))
+    
+    return frames_with_data
+  
+def receive_frame(client):
+    '''Receives one frame from server over client socket'''
     full_msg = b''
     new_msg = True
     while True:
@@ -168,7 +188,6 @@ def requestFrameFromServer(client):
             full_msg = b""
             client.send(FRAME_RECEIVED_MSG.encode('utf-8'))
             return img_bytes, mat_bytes
-
 
 if __name__ == "__main__":
     app.run(debug=True)
